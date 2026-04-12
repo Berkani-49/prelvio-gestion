@@ -6,13 +6,34 @@
     "start": "expo start",
     "android": "expo start --android",
     "ios": "expo start --ios",
-    "web": "expo start --web"
+    "web": "expo start --web",
+    "export": "expo export --platform web",
+    "deploy": "expo export --platform web && cp assets/icon.png dist/icon.png && node scripts/post-build.js && npx vercel deploy dist --prod --scope amirs-projects-56f13e4a --yes"
   },
   "dependencies": {
+    "@expo-google-fonts/inter": "^0.4.2",
+    "@expo/metro-runtime": "~55.0.6",
+    "@supabase/supabase-js": "^2.99.1",
+    "@tanstack/react-query": "^5.90.21",
     "expo": "~55.0.6",
+    "expo-camera": "~55.0.9",
+    "expo-constants": "~55.0.7",
+    "expo-dev-client": "~55.0.16",
+    "expo-font": "~55.0.4",
+    "expo-linking": "~55.0.7",
+    "expo-print": "~55.0.8",
+    "expo-router": "~55.0.5",
+    "expo-secure-store": "~55.0.8",
+    "expo-sharing": "~55.0.11",
     "expo-status-bar": "~55.0.4",
     "react": "19.2.0",
-    "react-native": "0.83.2"
+    "react-dom": "19.2.0",
+    "react-native": "0.83.2",
+    "react-native-mmkv": "^4.2.0",
+    "react-native-safe-area-context": "~5.6.2",
+    "react-native-screens": "~4.23.0",
+    "react-native-web": "^0.21.0",
+    "zustand": "^5.0.11"
   },
   "devDependencies": {
     "@types/react": "~19.2.2",
