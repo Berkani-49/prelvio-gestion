@@ -32,8 +32,12 @@ export default function ProductDetailScreen() {
       setMovError('Quantité invalide'); return;
     }
     setMovError('');
-    await stockMovement({ productId: id, type: modalType!, quantity: Number(quantity), reason: reason.trim() || undefined });
-    setModalType(null); setQuantity(''); setReason('');
+    try {
+      await stockMovement({ productId: id, type: modalType!, quantity: Number(quantity), reason: reason.trim() || undefined });
+      setModalType(null); setQuantity(''); setReason('');
+    } catch (err: unknown) {
+      setMovError(err instanceof Error ? err.message : 'Erreur lors du mouvement de stock');
+    }
   }
 
   async function confirmDelete() {

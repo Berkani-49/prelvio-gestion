@@ -5,11 +5,10 @@ const distDir = path.join(__dirname, '..', 'dist');
 
 // 1. vercel.json
 fs.writeFileSync(path.join(distDir, 'vercel.json'), JSON.stringify({
-  buildCommand: null,
+  buildCommand: '',
   outputDirectory: '.',
-  routes: [
-    { handle: 'filesystem' },
-    { src: '/(.*)', dest: '/index.html' },
+  rewrites: [
+    { source: '/(.*)', destination: '/index.html' },
   ],
 }, null, 2));
 

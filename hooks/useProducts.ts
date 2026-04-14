@@ -253,11 +253,7 @@ export function useRecentMovements(limit = 15) {
   });
 }
 
-// ── Mouvement de stock (atomique via RPC) ───────────────────
-//
-// Utilise la fonction PostgreSQL `apply_stock_movement` (migration 004).
-// Elle exécute SELECT … FOR UPDATE + UPDATE + INSERT dans une seule transaction,
-// éliminant toute race condition entre lectures et écritures concurrentes.
+// ── Mouvement de stock ───────────────────────────────────────
 
 export function useStockMovement() {
   const queryClient = useQueryClient();
@@ -276,20 +272,52 @@ export function useStockMovement() {
       quantity: number;
       reason?: string;
     }) => {
-      const { error } = await supabase.rpc('apply_stock_movement', {
-        p_product_id: productId,
-        p_store_id:   storeId!,
-        p_type:       type,
-        p_quantity:   quantity,
-        p_reason:     reason ?? null,
-        p_created_by: user?.id ?? null,
-      });
-      if (error) throw error;
+      if (!storeId) throw new Error('Boutique non chargée, veuillez réessayer.');
+
+      // Récupère la quantité actuelle
+      const { data: product, error: fetchError } = await db
+        .from('products')
+        .select('stock_quantity')
+        .eq('id', productId)
+        .eq('store_id', storeId)
+        .eq('is_active', true)
+        .single();
+      if (fetchError) throw fetchError;
+      if (!product) throw new Error('Produit introuvable ou inactif.');
+
+      // Calcule la nouvelle quantité
+      let newQty: number;
+      if (type === 'in')          newQty = product.stock_quantity + quantity;
+      else if (type === 'out')    newQty = product.stock_quantity - quantity;
+      else                        newQty = quantity; // adjustment
+      newQty = Math.max(0, newQty);
+
+      // Met à jour le stock du produit
+      const { error: updateError } = await db
+        .from('products')
+        .update({ stock_quantity: newQty, updated_at: new Date().toISOString() })
+        .eq('id', productId)
+        .eq('store_id', storeId);
+      if (updateError) throw updateError;
+
+      // Enregistre le mouvement
+      const { error: insertError } = await db
+        .from('stock_movements')
+        .insert({
+          product_id:  productId,
+          store_id:    storeId,
+          type,
+          quantity,
+          reason:      reason ?? null,
+          created_by:  user?.id ?? null,
+        });
+      if (insertError) throw insertError;
     },
     onSuccess: (_, { productId }) => {
       queryClient.invalidateQueries({ queryKey: ['products'] });
       queryClient.invalidateQueries({ queryKey: ['product', productId] });
       queryClient.invalidateQueries({ queryKey: ['stock_movements', productId] });
+      queryClient.invalidateQueries({ queryKey: ['stock_movements_recent'] });
     },
   });
 }

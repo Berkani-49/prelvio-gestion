@@ -63,7 +63,8 @@ export default function InventoryScreen() {
           [
             { text: 'Annuler', style: 'cancel', onPress: () => resolve(false) },
             { text: 'Valider', onPress: () => resolve(true) },
-          ]
+          ],
+          { cancelable: false }
         );
       }
     });
