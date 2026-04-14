@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import {
   View, Text, StyleSheet, ScrollView,
-  TouchableOpacity, ActivityIndicator, Modal,
+  TouchableOpacity, ActivityIndicator, Modal, TextInput,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router, useLocalSearchParams } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { CameraView, useCameraPermissions } from 'expo-camera';
-import { useProduct, useUpdateProduct, useCategories, STOCK_UNITS, calcMargin } from '@/hooks/useProducts';
+import { useProduct, useUpdateProduct, useCategories, useCreateCategory, CAT_COLORS, STOCK_UNITS, calcMargin } from '@/hooks/useProducts';
 import { Input } from '@/components/ui/Input';
 import { Colors, Spacing, Radius } from '@/constants/colors';
 
@@ -16,6 +16,23 @@ export default function EditProductScreen() {
   const { data: product } = useProduct(id);
   const { mutateAsync: updateProduct, isPending } = useUpdateProduct();
   const { data: categories } = useCategories();
+  const createCategory = useCreateCategory();
+
+  const [newCatName, setNewCatName] = useState('');
+  const [showNewCat, setShowNewCat] = useState(false);
+  const [newCatColor, setNewCatColor] = useState<string>(CAT_COLORS[0]);
+
+  function handleCreateCategory() {
+    if (!newCatName.trim()) return;
+    createCategory.mutate({ name: newCatName.trim(), color: newCatColor }, {
+      onSuccess: (cat) => {
+        update('category_id', cat.id);
+        setNewCatName('');
+        setShowNewCat(false);
+        setNewCatColor(CAT_COLORS[0]);
+      },
+    });
+  }
 
   const [form, setForm] = useState({
     name: '',
@@ -181,29 +198,61 @@ export default function EditProductScreen() {
           </View>
         </View>
 
-        {categories && categories.length > 0 && (
-          <View style={s.section}>
-            <Text style={s.sectionTitle}>Catégorie</Text>
-            <View style={s.catGrid}>
+        <View style={s.section}>
+          <Text style={s.sectionTitle}>Catégorie</Text>
+          <View style={s.catGrid}>
+            <TouchableOpacity
+              style={[s.catChip, !form.category_id && s.catChipActive]}
+              onPress={() => update('category_id', '')}
+            >
+              <Text style={[s.catTxt, !form.category_id && s.catTxtActive]}>Aucune</Text>
+            </TouchableOpacity>
+            {(categories ?? []).map((cat) => (
               <TouchableOpacity
-                style={[s.catChip, !form.category_id && s.catChipActive]}
-                onPress={() => update('category_id', '')}
+                key={cat.id}
+                style={[s.catChip, form.category_id === cat.id && s.catChipActive]}
+                onPress={() => update('category_id', cat.id)}
               >
-                <Text style={[s.catTxt, !form.category_id && s.catTxtActive]}>Aucune</Text>
+                <View style={[s.catDot, { backgroundColor: cat.color }]} />
+                <Text style={[s.catTxt, form.category_id === cat.id && s.catTxtActive]}>{cat.name}</Text>
               </TouchableOpacity>
-              {categories.map((cat) => (
-                <TouchableOpacity
-                  key={cat.id}
-                  style={[s.catChip, form.category_id === cat.id && s.catChipActive]}
-                  onPress={() => update('category_id', cat.id)}
-                >
-                  <View style={[s.catDot, { backgroundColor: cat.color }]} />
-                  <Text style={[s.catTxt, form.category_id === cat.id && s.catTxtActive]}>{cat.name}</Text>
-                </TouchableOpacity>
-              ))}
-            </View>
+            ))}
+            <TouchableOpacity
+              style={[s.catChip, { borderStyle: 'dashed' }]}
+              onPress={() => setShowNewCat(!showNewCat)}
+            >
+              <Ionicons name={showNewCat ? 'close' : 'add'} size={14} color={Colors.primary} />
+              <Text style={[s.catTxt, { color: Colors.primary }]}>Nouvelle</Text>
+            </TouchableOpacity>
           </View>
-        )}
+          {showNewCat && (
+            <View style={s.newCatWrap}>
+              <TextInput
+                style={s.newCatInput}
+                placeholder="Nom de la catégorie"
+                placeholderTextColor={Colors.textMuted}
+                value={newCatName}
+                onChangeText={setNewCatName}
+              />
+              <View style={s.newCatColors}>
+                {CAT_COLORS.map((c) => (
+                  <TouchableOpacity
+                    key={c}
+                    style={[s.newCatColorDot, { backgroundColor: c }, newCatColor === c && s.newCatColorDotActive]}
+                    onPress={() => setNewCatColor(c)}
+                  />
+                ))}
+              </View>
+              <TouchableOpacity
+                style={[s.newCatBtn, !newCatName.trim() && { opacity: 0.4 }]}
+                onPress={handleCreateCategory}
+                disabled={!newCatName.trim() || createCategory.isPending}
+              >
+                <Text style={s.newCatBtnTxt}>Créer la catégorie</Text>
+              </TouchableOpacity>
+            </View>
+          )}
+        </View>
 
         <TouchableOpacity style={s.submitBtn} onPress={handleSubmit} disabled={isPending} activeOpacity={0.8}>
           {isPending
@@ -291,4 +340,22 @@ const s = StyleSheet.create({
   scannerHint: { color: '#fff', fontSize: 14, fontWeight: '500', textShadowColor: '#000', textShadowRadius: 6, textShadowOffset: { width: 0, height: 1 } },
   scannerClose: { paddingHorizontal: 28, paddingVertical: 12, backgroundColor: 'rgba(0,0,0,0.6)', borderRadius: Radius.full, borderWidth: 1.5, borderColor: Colors.border },
   scannerCloseTxt: { color: '#fff', fontWeight: '700', fontSize: 15 },
+
+  newCatWrap: {
+    marginTop: 12, backgroundColor: Colors.surface, borderRadius: 16,
+    borderWidth: 1, borderColor: Colors.border, padding: 14, gap: 12,
+  },
+  newCatInput: {
+    height: 44, borderRadius: 12, backgroundColor: Colors.surfaceAlt,
+    borderWidth: 1, borderColor: Colors.border, paddingHorizontal: 14,
+    color: Colors.textPrimary, fontSize: 14,
+  },
+  newCatColors: { flexDirection: 'row', gap: 10, flexWrap: 'wrap' },
+  newCatColorDot: { width: 26, height: 26, borderRadius: 13, borderWidth: 2, borderColor: 'transparent' },
+  newCatColorDotActive: { borderColor: '#fff', shadowColor: '#fff', shadowOpacity: 0.4, shadowRadius: 6 },
+  newCatBtn: {
+    height: 42, borderRadius: 12, backgroundColor: Colors.primary,
+    alignItems: 'center', justifyContent: 'center',
+  },
+  newCatBtnTxt: { color: '#0B0D11', fontSize: 14, fontWeight: '800' },
 });
