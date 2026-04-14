@@ -18,7 +18,7 @@ export function useStore() {
   const { user } = useAuthStore();
   const { overrideStoreId } = useStoreOverride();
 
-  const { data: storeId, isLoading } = useQuery({
+  const { data: storeId, isLoading, isFetching } = useQuery({
     queryKey: ['store-id', user?.id],
     enabled: !!user,
     staleTime: 1000 * 60 * 5,
@@ -34,7 +34,10 @@ export function useStore() {
     },
   });
 
-  return { storeId: overrideStoreId ?? storeId ?? null, isLoading };
+  return {
+    storeId: overrideStoreId ?? storeId ?? null,
+    isLoading: isLoading || isFetching,
+  };
 }
 
 // Liste toutes les boutiques de l'utilisateur
