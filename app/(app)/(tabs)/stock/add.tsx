@@ -153,35 +153,37 @@ export default function AddProductScreen() {
           <Input label="Nom du produit *" placeholder="Ex: T-shirt blanc M" value={form.name} onChangeText={(v) => update('name', v)} error={errors.name} />
           <Input label="SKU (référence interne)" placeholder="Ex: TSH-BL-M" value={form.sku} onChangeText={(v) => update('sku', v)} autoCapitalize="characters" />
           <Text style={s.subLabel}>Code-barres</Text>
+          <View style={[s.barcodeInputWrap, laserMode && s.barcodeInputWrapLaser]}>
+            <Ionicons name="barcode-outline" size={17}
+              color={laserMode ? Colors.primary : Colors.textMuted} style={{ marginRight: 6 }} />
+            <TextInput
+              ref={barcodeInputRef}
+              style={s.barcodeInput}
+              value={form.barcode}
+              onChangeText={(v) => update('barcode', v)}
+              placeholder={laserMode ? 'En attente du scanner laser...' : 'Ex: 3760000000000'}
+              placeholderTextColor={laserMode ? Colors.primary : Colors.textMuted}
+              keyboardType="numeric"
+              onSubmitEditing={handleLaserScan}
+              autoFocus={laserMode}
+            />
+          </View>
           <View style={s.barcodeRow}>
-            <View style={[s.barcodeInputWrap, laserMode && s.barcodeInputWrapLaser]}>
-              <Ionicons name="barcode-outline" size={17}
-                color={laserMode ? Colors.primary : Colors.textMuted} style={{ marginRight: 6 }} />
-              <TextInput
-                ref={barcodeInputRef}
-                style={s.barcodeInput}
-                value={form.barcode}
-                onChangeText={(v) => update('barcode', v)}
-                placeholder={laserMode ? 'En attente du scanner laser...' : 'Ex: 3760000000000'}
-                placeholderTextColor={laserMode ? Colors.primary : Colors.textMuted}
-                keyboardType="numeric"
-                onSubmitEditing={handleLaserScan}
-                autoFocus={laserMode}
-              />
-            </View>
-            <TouchableOpacity style={[s.scanIconBtn, laserMode && s.scanIconBtnActive]} onPress={toggleLaserMode} activeOpacity={0.8}>
-              <Ionicons name="barcode-outline" size={22} color={laserMode ? '#0B0D11' : Colors.primary} />
+            <TouchableOpacity
+              style={[s.scanBtn, laserMode && s.scanBtnActive]}
+              onPress={toggleLaserMode}
+              activeOpacity={0.8}
+            >
+              <Ionicons name="barcode-outline" size={18} color={laserMode ? '#0B0D11' : Colors.primary} />
+              <Text style={[s.scanBtnTxt, laserMode && s.scanBtnTxtActive]}>
+                {laserMode ? 'Scanner actif' : 'Scanner laser'}
+              </Text>
             </TouchableOpacity>
-            <TouchableOpacity style={s.scanIconBtn} onPress={openScanner} activeOpacity={0.8}>
-              <Ionicons name="camera-outline" size={22} color={Colors.primary} />
+            <TouchableOpacity style={s.scanBtn} onPress={openScanner} activeOpacity={0.8}>
+              <Ionicons name="camera-outline" size={18} color={Colors.primary} />
+              <Text style={s.scanBtnTxt}>Scanner par caméra</Text>
             </TouchableOpacity>
           </View>
-          {laserMode && (
-            <View style={s.laserBanner}>
-              <Ionicons name="radio-outline" size={14} color={Colors.primary} />
-              <Text style={s.laserBannerTxt}>Mode scanner actif — scannez le code-barres du produit</Text>
-            </View>
-          )}
           <Input label="Description" placeholder="Description optionnelle..." value={form.description} onChangeText={(v) => update('description', v)} multiline numberOfLines={3} />
         </View>
 
@@ -369,7 +371,7 @@ const s = StyleSheet.create({
   root: { flex: 1, backgroundColor: Colors.background },
 
   header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: Spacing.lg, paddingTop: Spacing.sm, paddingBottom: Spacing.sm },
-  backBtn: { width: 38, height: 38, borderRadius: 12, backgroundColor: Colors.surface, borderWidth: 1, borderColor: Colors.border, alignItems: 'center', justifyContent: 'center' },
+  backBtn: { width: 38, height: 38, borderRadius: 19, backgroundColor: Colors.surface, borderWidth: 1, borderColor: Colors.border, alignItems: 'center', justifyContent: 'center' },
   title: { fontSize: 18, fontWeight: '800', color: Colors.textPrimary },
 
   scroll: { padding: Spacing.lg, gap: Spacing.lg, paddingBottom: 40 },
@@ -402,12 +404,16 @@ const s = StyleSheet.create({
   errorBox: { flexDirection: 'row', alignItems: 'center', gap: 8, backgroundColor: '#3B1212', borderRadius: Radius.md, padding: Spacing.md, borderWidth: 1, borderColor: `${Colors.danger}40` },
   errorTxt: { color: Colors.danger, fontSize: 13, flex: 1 },
 
-  barcodeRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+  barcodeRow: { flexDirection: 'row', gap: 8 },
   barcodeInputWrap: { flex: 1, flexDirection: 'row', alignItems: 'center', backgroundColor: Colors.surfaceAlt, borderRadius: Radius.md, borderWidth: 1.5, borderColor: Colors.border, paddingHorizontal: 12, height: 48 },
   barcodeInputWrapLaser: { borderColor: Colors.primary, backgroundColor: `${Colors.primary}15` },
   barcodeInput: { flex: 1, color: Colors.textPrimary, fontSize: 14, fontWeight: '500' },
-  scanIconBtn: { width: 48, height: 48, borderRadius: Radius.md, backgroundColor: Colors.surface, borderWidth: 1.5, borderColor: Colors.border, alignItems: 'center', justifyContent: 'center' },
+  scanIconBtn: { width: 48, height: 48, borderRadius: 24, backgroundColor: Colors.surface, borderWidth: 1.5, borderColor: Colors.border, alignItems: 'center', justifyContent: 'center' },
   scanIconBtnActive: { backgroundColor: Colors.primary, borderColor: Colors.primary },
+  scanBtn: { flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 7, paddingVertical: 11, borderRadius: Radius.md, backgroundColor: Colors.surface, borderWidth: 1.5, borderColor: Colors.border },
+  scanBtnActive: { backgroundColor: Colors.primary, borderColor: Colors.primary },
+  scanBtnTxt: { fontSize: 13, fontWeight: '600', color: Colors.primary },
+  scanBtnTxtActive: { color: '#0B0D11' },
   laserBanner: { flexDirection: 'row', alignItems: 'center', gap: 8, backgroundColor: `${Colors.primary}15`, borderRadius: Radius.md, padding: 10, borderWidth: 1, borderColor: `${Colors.primary}30` },
   laserBannerTxt: { fontSize: 12, fontWeight: '600', color: Colors.primary, flex: 1 },
 

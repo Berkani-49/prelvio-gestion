@@ -4,7 +4,6 @@ import {
   View, Text, StyleSheet, TouchableOpacity,
   Modal, Pressable, ActivityIndicator,
 } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
 import { useQueryClient } from '@tanstack/react-query';
 import { Colors, Spacing, Radius } from '@/constants/colors';
 import { create } from 'zustand';
@@ -94,7 +93,7 @@ function ProfileModal({ visible, onClose }: { visible: boolean; onClose: () => v
                   activeOpacity={0.7}
                 >
                   <View style={[pr.storeIcon, active && pr.storeIconActive]}>
-                    <Ionicons name="storefront" size={16} color={active ? '#0B0D11' : Colors.textMuted} />
+                    <Text style={pr.storeIconEmoji}>🏪</Text>
                   </View>
                   <View style={{ flex: 1 }}>
                     <Text style={[pr.storeName, active && pr.storeNameActive]}>{store.name}</Text>
@@ -105,7 +104,7 @@ function ProfileModal({ visible, onClose }: { visible: boolean; onClose: () => v
                         : 'Employé'}
                     </Text>
                   </View>
-                  {active && <Ionicons name="checkmark-circle" size={20} color={Colors.primary} />}
+                  {active && <Text style={pr.checkEmoji}>✓</Text>}
                 </TouchableOpacity>
               );
             })
@@ -114,7 +113,7 @@ function ProfileModal({ visible, onClose }: { visible: boolean; onClose: () => v
           <View style={pr.divider} />
 
           <TouchableOpacity style={pr.logoutBtn} onPress={handleSignOut} activeOpacity={0.7}>
-            <Ionicons name="log-out-outline" size={18} color={Colors.danger} />
+            <Text style={pr.logoutEmoji}>🚪</Text>
             <Text style={pr.logoutTxt}>Déconnexion</Text>
           </TouchableOpacity>
         </Pressable>
@@ -161,7 +160,7 @@ export default function TabLayout() {
             tabBarButton: () => (
               <TouchableOpacity style={tab.profileWrap} onPress={() => setProfileOpen(true)} activeOpacity={0.8}>
                 <View style={tab.profileBtn}>
-                  <Ionicons name="person" size={19} color="#0B0D11" />
+                  <Text style={tab.profileEmoji}>👤</Text>
                 </View>
                 <Text style={tab.profileLabel}>Profil</Text>
               </TouchableOpacity>
@@ -221,6 +220,7 @@ const tab = StyleSheet.create({
     shadowRadius: 10, shadowOffset: { width: 0, height: 3 },
   },
   profileLabel: { fontSize: 10, color: Colors.primary, fontWeight: '700' },
+  profileEmoji: { fontSize: 16 },
 });
 
 const pr = StyleSheet.create({
@@ -264,10 +264,13 @@ const pr = StyleSheet.create({
   storeName: { fontSize: 14, fontWeight: '700', color: Colors.textPrimary },
   storeNameActive: { color: Colors.primary },
   storeRole: { fontSize: 11, color: Colors.textMuted, marginTop: 1 },
+  storeIconEmoji: { fontSize: 16 },
+  checkEmoji: { fontSize: 18, fontWeight: '700', color: Colors.primary },
   logoutBtn: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8,
     paddingVertical: 12, borderRadius: Radius.md,
     backgroundColor: `${Colors.danger}10`, borderWidth: 1, borderColor: `${Colors.danger}25`,
   },
+  logoutEmoji: { fontSize: 16 },
   logoutTxt: { fontSize: 14, fontWeight: '700', color: Colors.danger },
 });

@@ -28,7 +28,7 @@ export function useStore() {
         .select('store_id')
         .eq('user_id', user!.id)
         .limit(1)
-        .single();
+        .maybeSingle();
       if (error) throw error;
       return (data as any)?.store_id as string ?? null;
     },
