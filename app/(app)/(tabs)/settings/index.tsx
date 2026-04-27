@@ -402,6 +402,17 @@ export default function SettingsScreen() {
           <SettingRow icon="key-outline" label="Identifiant boutique" value={storeId ? storeId.slice(0, 8) + '…' : '—'} />
         </View>
 
+        {/* ── Abonnement ── */}
+        <SectionTitle>Abonnement</SectionTitle>
+        <View style={st.card}>
+          <SettingRow
+            icon="flash-outline"
+            label="Tarifs & plans"
+            rightText="Voir les offres"
+            onPress={() => router.push('/(app)/(tabs)/settings/pricing' as any)}
+          />
+        </View>
+
         {/* ── Application ── */}
         <SectionTitle>Application</SectionTitle>
         <View style={st.card}>

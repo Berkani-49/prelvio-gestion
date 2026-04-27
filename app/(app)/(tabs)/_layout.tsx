@@ -5,6 +5,8 @@ import {
   Modal, Pressable, ActivityIndicator,
 } from 'react-native';
 import { useQueryClient } from '@tanstack/react-query';
+import { router } from 'expo-router';
+import { Ionicons } from '@expo/vector-icons';
 import { Colors, Spacing, Radius } from '@/constants/colors';
 import { create } from 'zustand';
 import { useStore, useUserStores, useStoreOverride } from '@/hooks/useStore';
@@ -109,6 +111,32 @@ function ProfileModal({ visible, onClose }: { visible: boolean; onClose: () => v
               );
             })
           )}
+
+          <View style={pr.divider} />
+
+          <TouchableOpacity
+            style={pr.menuRow}
+            onPress={() => { onClose(); router.push('/(app)/(tabs)/settings' as any); }}
+            activeOpacity={0.7}
+          >
+            <View style={pr.menuIcon}>
+              <Ionicons name="settings-outline" size={16} color={Colors.textSecondary} />
+            </View>
+            <Text style={pr.menuTxt}>Paramètres</Text>
+            <Ionicons name="chevron-forward" size={14} color={Colors.textMuted} />
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={pr.menuRow}
+            onPress={() => { onClose(); router.push('/(app)/(tabs)/settings/pricing' as any); }}
+            activeOpacity={0.7}
+          >
+            <View style={pr.menuIcon}>
+              <Ionicons name="flash-outline" size={16} color={Colors.primary} />
+            </View>
+            <Text style={[pr.menuTxt, { color: Colors.primary }]}>Tarifs & plans</Text>
+            <Ionicons name="chevron-forward" size={14} color={Colors.primary} />
+          </TouchableOpacity>
 
           <View style={pr.divider} />
 
@@ -266,6 +294,16 @@ const pr = StyleSheet.create({
   storeRole: { fontSize: 11, color: Colors.textMuted, marginTop: 1 },
   storeIconEmoji: { fontSize: 16 },
   checkEmoji: { fontSize: 18, fontWeight: '700', color: Colors.primary },
+  menuRow: {
+    flexDirection: 'row', alignItems: 'center', gap: 10,
+    paddingVertical: 10, paddingHorizontal: 4, borderRadius: Radius.md,
+  },
+  menuIcon: {
+    width: 30, height: 30, borderRadius: 8,
+    backgroundColor: Colors.surfaceAlt, borderWidth: 1, borderColor: Colors.border,
+    alignItems: 'center', justifyContent: 'center',
+  },
+  menuTxt: { flex: 1, fontSize: 14, fontWeight: '600', color: Colors.textPrimary },
   logoutBtn: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8,
     paddingVertical: 12, borderRadius: Radius.md,
