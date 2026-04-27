@@ -167,10 +167,14 @@ export default function TeamScreen() {
     }
     setInviteError('');
     try {
-      await inviteMember({ email: inviteEmail.trim(), role: inviteRole });
-      setInviteSuccess(`Invitation créée pour ${inviteEmail.trim()}`);
+      const result = await inviteMember({ email: inviteEmail.trim(), role: inviteRole });
+      setInviteSuccess(
+        result.emailSent
+          ? `Email d'invitation envoyé à ${inviteEmail.trim()} ✓`
+          : `Invitation créée. Configurez Resend dans Paramètres pour envoyer les emails automatiquement.`
+      );
       setInviteEmail('');
-      setTimeout(() => setInviteSuccess(''), 3000);
+      setTimeout(() => setInviteSuccess(''), 5000);
     } catch (e: any) {
       setInviteError(e.message ?? 'Erreur lors de l\'invitation');
     }

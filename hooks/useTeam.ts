@@ -106,6 +106,12 @@ export function useInvitations() {
   });
 }
 
+const ROLE_LABELS: Record<string, string> = {
+  manager: 'Gérant',
+  employee: 'Employé',
+  accountant: 'Comptable',
+};
+
 // ── Inviter par email ─────────────────────────────────────
 export function useInviteMember() {
   const { user } = useAuthStore();
@@ -114,7 +120,8 @@ export function useInviteMember() {
 
   return useMutation({
     mutationFn: async ({ email, role }: { email: string; role: MemberRole }) => {
-      const { data, error } = await db
+      // 1. Créer l'invitation en base
+      const { data: invitation, error } = await db
         .from('store_invitations')
         .insert({
           store_id: storeId!,
@@ -125,7 +132,42 @@ export function useInviteMember() {
         .select()
         .single();
       if (error) throw error;
-      return data;
+
+      // 2. Récupérer les infos du store pour l'email
+      const { data: store } = await db
+        .from('stores')
+        .select('name, resend_api_key')
+        .eq('id', storeId!)
+        .single();
+
+      // 3. Envoyer l'email si Resend est configuré
+      if (store?.resend_api_key) {
+        const storeName = store.name ?? 'votre boutique';
+        const roleLabel = ROLE_LABELS[role] ?? role;
+        await supabase.functions.invoke('send-email', {
+          body: {
+            apiKey: store.resend_api_key,
+            to: [email],
+            subject: `Invitation à rejoindre ${storeName} sur Prelvio`,
+            text: [
+              `Bonjour,`,
+              ``,
+              `Vous avez été invité(e) à rejoindre "${storeName}" en tant que ${roleLabel} sur Prelvio Gestion.`,
+              ``,
+              `Pour accepter l'invitation :`,
+              `1. Téléchargez l'application Prelvio Gestion`,
+              `2. Créez un compte avec cet email (${email})`,
+              `3. Vous rejoindrez automatiquement l'équipe`,
+              ``,
+              `À bientôt !`,
+              `L'équipe Prelvio`,
+            ].join('\n'),
+          },
+        });
+        return { ...invitation, emailSent: true };
+      }
+
+      return { ...invitation, emailSent: false };
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['invitations', storeId] });
