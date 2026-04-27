@@ -8,159 +8,22 @@ import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { Colors, Spacing, Radius } from '@/constants/colors';
 
-// Plan courant simulé — à remplacer par la donnée Stripe
-const CURRENT_PLAN = 'free';
-
-type Plan = {
-  id: string;
-  name: string;
-  price: string;
-  period: string;
-  tagline: string;
-  color: string;
-  badge?: string;
-  features: { label: string; included: boolean }[];
-};
-
-const PLANS: Plan[] = [
-  {
-    id: 'free',
-    name: 'Gratuit',
-    price: '0 €',
-    period: 'pour toujours',
-    tagline: 'Pour démarrer sereinement',
-    color: Colors.textSecondary,
-    features: [
-      { label: 'Jusqu\'à 100 produits', included: true },
-      { label: '1 utilisateur', included: true },
-      { label: 'Gestion du stock', included: true },
-      { label: 'Dashboard basique', included: true },
-      { label: 'Factures & devis', included: false },
-      { label: 'Export CSV', included: false },
-      { label: 'SMS clients (Twilio)', included: false },
-      { label: 'Email comptable', included: false },
-      { label: 'Équipe multi-utilisateurs', included: false },
-    ],
-  },
-  {
-    id: 'pro',
-    name: 'Pro',
-    price: '29 €',
-    period: '/ mois',
-    tagline: 'Pour les boutiques en croissance',
-    color: Colors.primary,
-    badge: 'Populaire',
-    features: [
-      { label: 'Produits illimités', included: true },
-      { label: 'Jusqu\'à 5 utilisateurs', included: true },
-      { label: 'Gestion du stock avancée', included: true },
-      { label: 'Dashboard complet', included: true },
-      { label: 'Factures & devis', included: true },
-      { label: 'Export CSV', included: true },
-      { label: 'SMS clients (Twilio)', included: true },
-      { label: 'Email comptable', included: true },
-      { label: 'Équipe multi-utilisateurs', included: false },
-    ],
-  },
-  {
-    id: 'business',
-    name: 'Business',
-    price: '79 €',
-    period: '/ mois',
-    tagline: 'Pour les équipes ambitieuses',
-    color: Colors.warning,
-    features: [
-      { label: 'Produits illimités', included: true },
-      { label: 'Utilisateurs illimités', included: true },
-      { label: 'Toutes les fonctionnalités Pro', included: true },
-      { label: 'Dashboard avancé & analytics', included: true },
-      { label: 'Factures & devis', included: true },
-      { label: 'Export CSV', included: true },
-      { label: 'SMS clients (Twilio)', included: true },
-      { label: 'Email comptable', included: true },
-      { label: 'Support prioritaire', included: true },
-    ],
-  },
+const FEATURES = [
+  'Produits & stock illimités',
+  'Utilisateurs illimités',
+  'Caisse (POS) avec scanner code-barres',
+  'Factures & devis',
+  'Gestion des clients & fidélité',
+  'Gestion des fournisseurs',
+  'Tableau de bord & analytics',
+  'Export CSV comptable',
+  'SMS clients (Twilio)',
+  'Email comptable (Resend)',
+  'Gestion des dépenses',
+  'Transactions & historique',
+  'Équipe multi-utilisateurs & rôles',
+  'Support prioritaire',
 ];
-
-function PlanCard({ plan, isCurrent }: { plan: Plan; isCurrent: boolean }) {
-  const isPro = plan.id === 'pro';
-
-  return (
-    <View style={[s.card, isCurrent && s.cardCurrent, isPro && s.cardPro]}>
-      {/* Badge Populaire */}
-      {plan.badge && (
-        <View style={[s.badge, { backgroundColor: plan.color }]}>
-          <Text style={s.badgeTxt}>{plan.badge}</Text>
-        </View>
-      )}
-
-      {/* En-tête */}
-      <View style={s.cardHeader}>
-        <View style={[s.planDot, { backgroundColor: `${plan.color}20` }]}>
-          <View style={[s.planDotInner, { backgroundColor: plan.color }]} />
-        </View>
-        <View style={{ flex: 1 }}>
-          <Text style={[s.planName, { color: plan.color }]}>{plan.name}</Text>
-          <Text style={s.planTagline}>{plan.tagline}</Text>
-        </View>
-        {isCurrent && (
-          <View style={s.currentBadge}>
-            <Text style={s.currentBadgeTxt}>Actuel</Text>
-          </View>
-        )}
-      </View>
-
-      {/* Prix */}
-      <View style={s.priceRow}>
-        <Text style={[s.price, { color: plan.color }]}>{plan.price}</Text>
-        <Text style={s.period}>{plan.period}</Text>
-      </View>
-
-      {/* Séparateur */}
-      <View style={s.divider} />
-
-      {/* Fonctionnalités */}
-      <View style={s.featureList}>
-        {plan.features.map((f, i) => (
-          <View key={i} style={s.featureRow}>
-            <Ionicons
-              name={f.included ? 'checkmark-circle' : 'close-circle-outline'}
-              size={16}
-              color={f.included ? Colors.success : Colors.textMuted}
-            />
-            <Text style={[s.featureTxt, !f.included && s.featureTxtOff]}>
-              {f.label}
-            </Text>
-          </View>
-        ))}
-      </View>
-
-      {/* CTA */}
-      {!isCurrent && (
-        <TouchableOpacity
-          style={[s.ctaBtn, { borderColor: plan.color, backgroundColor: isPro ? plan.color : 'transparent' }]}
-          activeOpacity={0.75}
-          onPress={() => {
-            // TODO: connecter à Stripe
-            if (Platform.OS === 'web') {
-              window.alert('Intégration Stripe à venir !');
-            }
-          }}
-        >
-          <Text style={[s.ctaTxt, { color: isPro ? '#fff' : plan.color }]}>
-            {plan.id === 'free' ? 'Rétrograder' : 'Choisir ce plan'}
-          </Text>
-          <Ionicons
-            name="arrow-forward"
-            size={14}
-            color={isPro ? '#fff' : plan.color}
-          />
-        </TouchableOpacity>
-      )}
-    </View>
-  );
-}
 
 export default function PricingScreen() {
   return (
@@ -181,28 +44,59 @@ export default function PricingScreen() {
             <Ionicons name="flash" size={12} color={Colors.primary} />
             <Text style={s.heroPillTxt}>Sans engagement · Résiliable à tout moment</Text>
           </View>
-          <Text style={s.heroTitle}>Choisissez votre plan</Text>
+          <Text style={s.heroTitle}>Un seul plan.{'\n'}Tout inclus.</Text>
           <Text style={s.heroSub}>
-            Passez à l'offre qui correspond à votre activité. Changez de plan quand vous voulez.
+            Accédez à toutes les fonctionnalités sans restriction, dès le premier jour.
           </Text>
         </View>
 
-        {/* Plans */}
-        <View style={s.plansList}>
-          {PLANS.map(plan => (
-            <PlanCard
-              key={plan.id}
-              plan={plan}
-              isCurrent={plan.id === CURRENT_PLAN}
-            />
-          ))}
+        {/* Carte unique */}
+        <View style={s.card}>
+          {/* Prix */}
+          <View style={s.priceBlock}>
+            <View style={s.priceRow}>
+              <Text style={s.price}>45 €</Text>
+              <Text style={s.period}>/ mois</Text>
+            </View>
+            <Text style={s.priceHT}>HT · Facturation mensuelle</Text>
+          </View>
+
+          {/* Séparateur */}
+          <View style={s.divider} />
+
+          {/* Features */}
+          <View style={s.featureList}>
+            {FEATURES.map((f, i) => (
+              <View key={i} style={s.featureRow}>
+                <View style={s.checkWrap}>
+                  <Ionicons name="checkmark" size={13} color="#fff" />
+                </View>
+                <Text style={s.featureTxt}>{f}</Text>
+              </View>
+            ))}
+          </View>
+
+          {/* CTA */}
+          <TouchableOpacity
+            style={s.ctaBtn}
+            activeOpacity={0.85}
+            onPress={() => {
+              // TODO: connecter à Stripe
+              if (Platform.OS === 'web') {
+                window.alert('Intégration Stripe à venir !');
+              }
+            }}
+          >
+            <Ionicons name="flash" size={18} color="#0B0D11" />
+            <Text style={s.ctaTxt}>S'abonner · 45 € / mois</Text>
+          </TouchableOpacity>
         </View>
 
         {/* Note bas de page */}
         <View style={s.footerNote}>
           <Ionicons name="lock-closed-outline" size={13} color={Colors.textMuted} />
           <Text style={s.footerNoteTxt}>
-            Paiements sécurisés via Stripe. Les prix sont HT. Facturation mensuelle.
+            Paiements sécurisés via Stripe. Prix HT. Résiliable à tout moment depuis votre espace.
           </Text>
         </View>
       </ScrollView>
@@ -225,7 +119,10 @@ const s = StyleSheet.create({
   },
   headerTitle: { fontSize: 16, fontWeight: '800', color: Colors.textPrimary },
 
-  hero: { alignItems: 'center', paddingHorizontal: Spacing.lg, paddingTop: Spacing.xl, paddingBottom: Spacing.md, gap: 10 },
+  hero: {
+    alignItems: 'center', paddingHorizontal: Spacing.lg,
+    paddingTop: Spacing.xl, paddingBottom: Spacing.lg, gap: 12,
+  },
   heroPill: {
     flexDirection: 'row', alignItems: 'center', gap: 5,
     backgroundColor: `${Colors.primary}12`, borderRadius: Radius.full,
@@ -233,65 +130,50 @@ const s = StyleSheet.create({
     borderWidth: 1, borderColor: `${Colors.primary}25`,
   },
   heroPillTxt: { fontSize: 11, fontWeight: '600', color: Colors.primary },
-  heroTitle: { fontSize: 26, fontWeight: '900', color: Colors.textPrimary, textAlign: 'center' },
-  heroSub: { fontSize: 13, color: Colors.textSecondary, textAlign: 'center', lineHeight: 20, maxWidth: 300 },
-
-  plansList: { paddingHorizontal: Spacing.md, gap: 16, paddingTop: Spacing.md },
+  heroTitle: {
+    fontSize: 30, fontWeight: '900', color: Colors.textPrimary,
+    textAlign: 'center', lineHeight: 38, letterSpacing: -0.5,
+  },
+  heroSub: {
+    fontSize: 14, color: Colors.textSecondary,
+    textAlign: 'center', lineHeight: 21, maxWidth: 280,
+  },
 
   card: {
+    marginHorizontal: Spacing.md,
     backgroundColor: Colors.surface, borderRadius: Radius.xl,
-    borderWidth: 1.5, borderColor: Colors.border,
-    padding: Spacing.md, gap: 0, overflow: 'hidden',
-  },
-  cardCurrent: { borderColor: Colors.primary, borderWidth: 2 },
-  cardPro: {
-    borderColor: Colors.primary,
+    borderWidth: 2, borderColor: Colors.primary,
+    padding: Spacing.lg,
     shadowColor: Colors.primary,
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.15,
-    shadowRadius: 16,
-    elevation: 6,
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.18,
+    shadowRadius: 20,
+    elevation: 8,
   },
 
-  badge: {
-    position: 'absolute', top: 14, right: 14,
-    paddingHorizontal: 10, paddingVertical: 4,
-    borderRadius: Radius.full,
+  priceBlock: { alignItems: 'center', paddingVertical: Spacing.md, gap: 4 },
+  priceRow: { flexDirection: 'row', alignItems: 'baseline', gap: 6 },
+  price: { fontSize: 52, fontWeight: '900', color: Colors.primary, letterSpacing: -2 },
+  period: { fontSize: 18, color: Colors.textSecondary, fontWeight: '600' },
+  priceHT: { fontSize: 12, color: Colors.textMuted, fontWeight: '500' },
+
+  divider: { height: 1, backgroundColor: Colors.border, marginVertical: Spacing.md },
+
+  featureList: { gap: 12, marginBottom: Spacing.lg },
+  featureRow: { flexDirection: 'row', alignItems: 'center', gap: 12 },
+  checkWrap: {
+    width: 22, height: 22, borderRadius: 11,
+    backgroundColor: Colors.success, alignItems: 'center', justifyContent: 'center',
+    flexShrink: 0,
   },
-  badgeTxt: { fontSize: 10, fontWeight: '800', color: '#fff', letterSpacing: 0.4 },
-
-  cardHeader: { flexDirection: 'row', alignItems: 'center', gap: 12, marginBottom: 14 },
-  planDot: {
-    width: 36, height: 36, borderRadius: 10,
-    alignItems: 'center', justifyContent: 'center',
-  },
-  planDotInner: { width: 12, height: 12, borderRadius: 6 },
-  planName: { fontSize: 17, fontWeight: '800' },
-  planTagline: { fontSize: 11, color: Colors.textSecondary, marginTop: 1 },
-
-  currentBadge: {
-    backgroundColor: `${Colors.primary}15`, borderRadius: Radius.full,
-    paddingHorizontal: 9, paddingVertical: 4, borderWidth: 1, borderColor: `${Colors.primary}30`,
-  },
-  currentBadgeTxt: { fontSize: 10, fontWeight: '700', color: Colors.primary },
-
-  priceRow: { flexDirection: 'row', alignItems: 'baseline', gap: 4, marginBottom: 14 },
-  price: { fontSize: 32, fontWeight: '900' },
-  period: { fontSize: 13, color: Colors.textSecondary, fontWeight: '500' },
-
-  divider: { height: 1, backgroundColor: Colors.border, marginBottom: 14 },
-
-  featureList: { gap: 10, marginBottom: 16 },
-  featureRow: { flexDirection: 'row', alignItems: 'center', gap: 9 },
-  featureTxt: { fontSize: 13, color: Colors.textPrimary, fontWeight: '500', flex: 1 },
-  featureTxtOff: { color: Colors.textMuted },
+  featureTxt: { fontSize: 14, color: Colors.textPrimary, fontWeight: '500', flex: 1 },
 
   ctaBtn: {
-    flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 7,
-    borderWidth: 1.5, borderRadius: Radius.md,
-    paddingVertical: 13, marginTop: 4,
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 9,
+    backgroundColor: Colors.primary, borderRadius: Radius.lg,
+    paddingVertical: 17,
   },
-  ctaTxt: { fontSize: 14, fontWeight: '800' },
+  ctaTxt: { fontSize: 16, fontWeight: '900', color: '#0B0D11' },
 
   footerNote: {
     flexDirection: 'row', alignItems: 'center', gap: 7,
